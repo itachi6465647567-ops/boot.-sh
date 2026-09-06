@@ -11,7 +11,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install dependencies and Run Build
+      - name: Install Build Tools and Run boot.sh
         run: |
           sudo apt-get update
           sudo apt-get install -y live-build xorriso squashfs-tools isolinux syslinux-utils
@@ -24,5 +24,6 @@ jobs:
           name: Titan-OS-ISO
           path: |
             ~/Desktop/*.iso
+            ~/titan-build/*.iso
             *.iso
           if-no-files-found: warn
