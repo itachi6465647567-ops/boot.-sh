@@ -62,13 +62,14 @@ echo "TITAN OS is up to date!"
 EOF
 sudo chmod +x /usr/local/bin/titan-update
 
+
 echo "[9/9] Configuring Live-Build Directory & Generating ISO..."
-mkdir -p ~/titan-build && cd ~/titan-build
+# தற்போதைய டைரக்டரியிலேயே பில்ட் செய்யும் வகையில் அமைத்தல்:
 lb config --architectures amd64 --distribution bookworm --archive-areas "main contrib non-free non-free-firmware"
 sudo lb build
 
-mkdir -p ~/Desktop
-mv *.iso ~/Desktop/titan-os.iso || mv *.hybrid.iso ~/Desktop/titan-os.iso || true
+# பில்ட் ஆன ISO ஃபைலை root / workspace டைரக்டரிக்கு கொண்டு வருதல்:
+sudo mv *.iso /tmp/titan-os.iso 2>/dev/null || sudo mv *.hybrid.iso /tmp/titan-os.iso 2>/dev/null || true
 
 echo "=============================================================================="
 echo "TITAN OS BUILD COMPLETE!"
