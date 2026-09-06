@@ -22,5 +22,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Titan-OS-ISO
-          path: /tmp/titan-output/titan-os.iso
+          path: "*.iso"
           if-no-files-found: error
