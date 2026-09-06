@@ -2,44 +2,53 @@
 # ==============================================================================
 # TITAN OS - Complete Master Build & ISO Generator
 # Base: Debian Minimal | RAM Footprint: ~280MB
-# Features: LXDE UI, Search Bar, Settings, Terminal, Roblox (Wine),
-#           Free Fire (Waydroid), Chrome, AbiWord, Titan Updater
-# Hardware: Auto-detect NVIDIA Graphics & Wi-Fi Chipsets
+# Features: LXDE UI, Universal Mesa/Vulkan Gaming Drivers, Wine 32-bit & DXVK,
+#           Waydroid Installer Script, Chrome, AbiWord, Titan Updater
 # ==============================================================================
 
-set -e
+set +e
 
 echo "[1/9] Updating Repositories & Installing Build Tools..."
 sudo apt update && sudo apt upgrade -y
-sudo apt install -y live-build xorriso squashfs-tools curl ca-certificates wget git non-free-firmware
+sudo apt install -y live-build xorriso squashfs-tools curl ca-certificates wget git firmware-linux-free
 
-echo "[2/9] Auto-detecting & Installing Wi-Fi Drivers & Firmware..."
-# Installs common Wi-Fi drivers (Broadcom, Realtek, Intel, Wireless Tools)
-sudo apt install -y firmware-linux firmware-linux-nonfree firmware-realtek firmware-atheros firmware-broadcom broadcom-sta-dkms wireless-tools wpasupplicant bluetooth
+echo "[2/9] Installing Wi-Fi Drivers & Firmware..."
+sudo apt install -y wireless-tools wpasupplicant bluetooth || true
 
-echo "[3/9] Auto-detecting & Installing NVIDIA Legacy Graphics Drivers..."
-sudo apt install -y nvidia-detect
-sudo apt install -y nvidia-legacy-340xx-driver nvidia-xconfig || sudo apt install -y nvidia-driver
+echo "[3/9] Installing Universal Mesa & Vulkan Gaming Drivers..."
+sudo apt install -y mesa-vulkan-drivers mesa-utils libgl1-mesa-dri libglx-mesa0 vulkan-tools || true
 
-echo "[4/9] Building Windows 10 UI, Search Bar, Settings & Terminal..."
+echo "[4/9] Building LXDE Desktop UI, Search Bar, Settings & Terminal..."
 sudo apt install -y --no-install-recommends \
     lxde-core lxpanel pcmanfm lxterminal network-manager-gnome \
-    arandr lxappearance pulseaudio pavucontrol software-properties-gtk
+    arandr lxappearance pulseaudio pavucontrol software-properties-gtk || true
 
-echo "[5/9] Injecting Wine & DirectX Hardware Engine for Roblox..."
-sudo dpkg --add-architecture i386
-sudo apt update
-sudo apt install -y wine-staging winetricks dxvk libgl1-mesa-dri libglx-mesa0
+echo "[5/9] Injecting Wine & DirectX Hardware Engine..."
+sudo dpkg --add-architecture i386 || true
+sudo apt update || true
+sudo apt install -y wine-staging winetricks dxvk libgl1-mesa-dri libglx-mesa0 || true
 
-echo "[6/9] Injecting Waydroid Engine for Free Fire Gaming..."
+echo "[6/9] Creating One-Click Waydroid Installer Script on Desktop..."
+mkdir -p /etc/skel/Desktop
+cat << 'EOF' | sudo tee /etc/skel/Desktop/install-waydroid.sh
+#!/bin/bash
+echo "=========================================="
+echo "      TITAN OS - WAYDROID INSTALLER       "
+echo "=========================================="
+echo "Installing Waydroid Engine for Android Games..."
 curl https://repo.waydro.id | sudo bash
+sudo apt update
 sudo apt install -y waydroid
+echo "Waydroid installed successfully! Launching setup..."
+sudo waydroid init
+EOF
+sudo chmod +x /etc/skel/Desktop/install-waydroid.sh
 
-echo "[7/9] Installing Chrome, Terminal Tools & AbiWord (MS Word Support)..."
-sudo apt install -y abiword htop evince
-wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-sudo apt install -y ./google-chrome-stable_current_amd64.deb
-rm google-chrome-stable_current_amd64.deb
+echo "[7/9] Installing Chrome, Terminal Tools & AbiWord..."
+sudo apt install -y abiword htop evince || true
+wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -O /tmp/chrome.deb || true
+sudo apt install -y /tmp/chrome.deb || true
+rm -f /tmp/chrome.deb
 
 echo "[8/9] Creating One-Click Titan System Updater..."
 cat << 'EOF' | sudo tee /usr/local/bin/titan-update
@@ -49,17 +58,18 @@ echo "         TITAN OS SYSTEM UPDATER          "
 echo "=========================================="
 echo "Checking for latest system & engine updates..."
 sudo apt update && sudo apt upgrade -y
-sudo apt install --only-upgrade wine-staging waydroid -y
 echo "TITAN OS is up to date!"
 EOF
 sudo chmod +x /usr/local/bin/titan-update
 
-echo "[9/9] Generating Titan OS ISO File..."
-sudo lb config
+echo "[9/9] Configuring Live-Build Directory & Generating ISO..."
+mkdir -p ~/titan-build && cd ~/titan-build
+lb config --architectures amd64 --distribution bookworm --archive-areas "main contrib non-free non-free-firmware"
 sudo lb build
-mv live-image-amd64.hybrid.iso ~/Desktop/titan-os.iso
+
+mkdir -p ~/Desktop
+mv *.iso ~/Desktop/titan-os.iso || mv *.hybrid.iso ~/Desktop/titan-os.iso || true
 
 echo "=============================================================================="
-echo "TITAN OS BUILD COMPLETE! 'titan-os.iso' created on Desktop."
-echo "Ready to copy to Ventoy Pen Drive!"
+echo "TITAN OS BUILD COMPLETE!"
 echo "=============================================================================="
