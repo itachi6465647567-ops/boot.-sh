@@ -63,11 +63,11 @@ EOF
 sudo chmod +x /usr/local/bin/titan-update
 
 echo "[9/9] Generating Titan OS ISO File..."
-lb config --architectures amd64 --distribution bookworm --archive-areas "main contrib non-free non-free-firmware"
+sudo lb config --architectures amd64 --distribution bookworm --archive-areas "main contrib non-free non-free-firmware"
 sudo lb build
 
-mkdir -p ~/Desktop
-sudo mv *.iso ~/Desktop/titan-os.iso 2>/dev/null || sudo mv *.hybrid.iso ~/Desktop/titan-os.iso 2>/dev/null || true
+mkdir -p /tmp/titan-output
+sudo mv *.iso /tmp/titan-output/titan-os.iso 2>/dev/null || sudo mv *.hybrid.iso /tmp/titan-output/titan-os.iso 2>/dev/null || true
 
 echo "=============================================================================="
 echo "TITAN OS BUILD COMPLETE!"
