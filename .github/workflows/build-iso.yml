@@ -1,1 +1,28 @@
 
+name: Build Titan OS ISO
+on: [push, workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install live-build dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y live-build xorriso squashfs-tools
+
+      - name: Make script executable and build ISO
+        run: |
+          chmod +x boot.sh || chmod +x food.sh
+          if [ -f boot.sh ]; then
+            sudo bash boot.sh
+          else
+            sudo bash food.sh
+          fi
+
+      - name: Upload Titan OS ISO
+        uses: actions/upload-artifact@v4
+        with:
+          name: Titan-OS-ISO
+          path: ~/Desktop/titan-os.iso
