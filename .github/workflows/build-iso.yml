@@ -1,4 +1,3 @@
-
 name: Build Titan OS ISO
 on: [push, workflow_dispatch]
 jobs:
@@ -12,14 +11,10 @@ jobs:
           sudo apt update
           sudo apt install -y live-build xorriso squashfs-tools
 
-      - name: Make script executable and build ISO
+      - name: Make boot.sh executable and build ISO
         run: |
-          chmod +x boot.sh || chmod +x food.sh
-          if [ -f boot.sh ]; then
-            sudo bash boot.sh
-          else
-            sudo bash food.sh
-          fi
+          chmod +x boot.sh
+          sudo bash boot.sh
 
       - name: Upload Titan OS ISO
         uses: actions/upload-artifact@v4
