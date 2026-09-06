@@ -3,7 +3,6 @@ name: Build Titan OS ISO
 on:
   workflow_dispatch:
   push:
-    branches: [ "main" ]
 
 jobs:
   build:
@@ -12,24 +11,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Environment and Build Titan OS ISO
+      - name: Install dependencies and Run Build
         run: |
           sudo apt-get update
           sudo apt-get install -y live-build xorriso squashfs-tools isolinux syslinux-utils
-          
-          # boot.sh ஃபைலுக்கு அனுமதி கொடுத்து இயக்கவும்
           chmod +x boot.sh
           sudo bash boot.sh
 
-      - name: Check ISO File
-        run: |
-          ls -la ~/Desktop/ || true
-          ls -la *.iso || true
-
-      - name: Upload Titan OS ISO Artifact
+      - name: Upload Titan OS ISO
         uses: actions/upload-artifact@v4
         with:
-          name: Titan-OS-64bit-ISO
+          name: Titan-OS-ISO
           path: |
             ~/Desktop/*.iso
             *.iso
